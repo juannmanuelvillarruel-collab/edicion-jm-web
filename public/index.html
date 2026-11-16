@@ -791,8 +791,11 @@
   // Cursor propio (solo con mouse)
   if (!reduce && window.matchMedia && matchMedia("(hover: hover) and (pointer: fine)").matches && jm) {
     var cur = root.createElement("div"); cur.className = "cur"; cur.setAttribute("aria-hidden", "true"); jm.appendChild(cur);
+    // Sobre un iframe (la agenda de Google) los eventos no llegan a la página: se oculta para que no quede clavado
+    root.querySelectorAll("iframe").forEach(function (f) { ["pointerenter", "mouseenter", "mouseover"].forEach(function (ev) { f.addEventListener(ev, function () { cur.classList.remove("on"); }); }); });
     window.addEventListener("pointermove", function (e) {
-      cur.classList.add("on");
+      cur.classList.toggle("on", !(e.target && e.target.tagName === "IFRAME"));
+      clearTimeout(cur._t); cur._t = setTimeout(function () { cur.classList.remove("on"); }, 900);
       cur.style.transform = "translate(" + e.clientX + "px," + e.clientY + "px)";
       var t = e.target && e.target.closest ? e.target.closest("a,button,input,.rcard,.tab,.photo") : null;
       cur.classList.toggle("big", !!t);
